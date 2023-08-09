@@ -1,0 +1,106 @@
+#!/usr/bin/env python           
+
+#Michal Dabrowski, cwiczenia 7 (wykrywanie progu perkolacji)
+from scipy import linspace, polyfit, randn
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+import random
+import math
+
+#folder zapisu rysunkow
+folder="C:/Users/michal/Documents/studia/fizyka_komputerowa/symulacje_komputerowe/2012/python/cwiczenia7/"
+
+#stale fizyczne i warunki poczatkowe
+z = 200
+Pr = np.arange(0.45, 0.65, 0.01)
+S = []
+R = []
+
+#inicjalizacja macierzy sasiadow
+def Macierz(z):
+    M = (-1)*np.ones((z, z))   
+    for i in range(z):
+        M[0, i] = - 2
+        M[i, 0] = - 2
+        M[z-1, i] = - 2
+        M[i, z-1] = - 2       
+    return M
+
+#zaznaczanie nieodwiedzonych sasiadow + sprawdzanie perkolacji
+def Punkt(M, x, y, s, czy):
+    if random.random() < p:
+        M[x, y] = 1
+	X = []
+        Y = []
+        N.append((x,y))
+	X.append(z/2 - 1)
+        Y.append(z/2 - 1)
+        if M[x+1, y]==-2 or M[x-1, y]==-2 or M[x, y-1]==-2 or M[x, y+1]==-2:
+            s = s + 1
+            czy = 1            
+    else:
+        M[x, y] = 0
+    return M, s, czy
+
+#szukanie progu perkolacji
+for k in range(len(Pr)):
+    p = Pr[k]
+    s = 0
+    pom=0
+    temp=0
+    #sredniowanie po wielu przebiegach petli
+    for i in range(500):
+        czy = 0
+        N = []
+        A = Macierz(z)
+        A[z/2 - 1, z/2 - 1] = 1
+        N.append((z/2 - 1,z/2 - 1))
+        #przeszukiwanie macierzy sasiadow
+        while True:
+            for j in range(len(N)):
+                a, b = N.pop()
+                if A[a-1, b] == -1:
+                    M, s, czy = Punkt(A, a-1, b, s, czy)
+                if czy == 1:
+                    break
+                if A[a+1, b] == -1:
+                    M, s, czy = Punkt(A, a+1, b, s, czy)
+                if czy == 1:
+                    break  
+                if A[a, b-1] == -1:
+                    M, s, czy = Punkt(A, a, b-1, s, czy)
+                if czy == 1:
+                    break
+                if A[a, b+1] == -1:
+                    M, s, czy = Punkt(A, a, b+1, s, czy)
+                if czy == 1:
+                    break
+	    if(czy==0):
+               temp+=np.sum(A==1)
+               pom+=1
+            #sprawdzanie czy znaleziona perkolacje        
+            if czy == 1:
+		#ewentualnie procedura rysowania
+                break
+            if len(N) == 0:
+                break
+    
+    R.append(float(temp)/float(pom))
+    S.append(s/500.)
+    print S
+
+#rysowanie wykresu progu perkolacji
+plt.clf()
+plt.subplot(211)
+plt.title("Prawdopodobienstwo perkolacji P(p)")
+plt.plot(Pr, S)
+plt.xlim((0,1))
+plt.grid(True)
+plt.subplot(212)
+plt.title("Sredni rozmiar klastra S(p)")
+plt.plot(Pr, R)
+plt.xlim((0,1))
+plt.grid(True)
+plt.xlabel("prawdopodobienstwo p")
+plt.savefig(folder+"zad2_"+str(z)+'.png')
