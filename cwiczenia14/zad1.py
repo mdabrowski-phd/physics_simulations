@@ -1,0 +1,53 @@
+#!/usr/bin/env python           
+
+#Michal Dabrowski, cwiczenia 14 (unormowany pakiet gaussowski)
+import sys, cmath
+import math as mt
+import matplotlib.pyplot as plt 
+from numpy import *
+from scipy import *
+from matplotlib.pyplot import *
+
+#folder zapisu rysunkow
+folder="C:/Users/michal/Documents/studia/fizyka_komputerowa/symulacje_komputerowe/2012/laboratorium/cwiczenia14/"
+
+#stale fizyczne i warunki poczatkowe
+M=100
+K=0.
+n0=M/5
+l0=M/2
+n=np.arange(M)
+
+#tworzenie rozkladu Gaussa
+def gauss(n):
+	s=0
+	L=-4
+	while(L<5):
+		s+=mt.exp(-mt.pi*(n-n0-L*M)**2/M)
+		L+=1
+	return cmath.exp(1j*2*mt.pi*l0*n/M)*s
+
+#tworzenie znormalizowanego rozkladu Gaussa
+def gauss_norm(n):
+	su=0
+	for i in xrange(M):
+		su+=gauss(i).conjugate()*gauss(i)
+	return gauss(n)/cmath.sqrt(su)
+
+#obliczanie amplitudy prawdopodobienstwa
+X=[gauss_norm(i) for i in n]
+Fx=np.fft.fft(X)
+Y=[i.conjugate()*i for i in X]
+Z=[i.conjugate()*i/M for i in Fx]
+
+#rysowanie amplitudy funkcji falowych
+plt.plot(n,Y, 'r',n,Z, 'g')
+plt.title("Amplituda prawdopodobienstwa funkcji falowej")
+plt.xlabel("wspolrzedna uogolniona")
+plt.ylabel("amplituda prawdopodobienstwa")
+plt.grid(True)
+plt.legend(("polozenie $x_0$", "ped $p_0$"))
+plt.savefig(folder + "gauss.pdf", format="pdf")
+plt.show()
+
+
