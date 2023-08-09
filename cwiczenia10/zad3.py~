@@ -1,0 +1,77 @@
+import numpy as np
+import random
+import math
+from scipy import linspace, polyfit
+import matplotlib.pyplot as plt
+from PIL import Image
+
+def sprawdz(X, Y, x, y):
+    d = 0
+    for a in range(len(X)):
+        if (x == X[a]) and (y == Y[a]):
+            d = 1
+            break
+    if (d == 0):
+        X.append(x)
+        Y.append(y)
+
+dl = 1000
+delta = dl/2
+X = [0, 0, -1, 1]
+Y = [1, -1, 0, 0]
+n = [0, 0, 0, 0]
+image = Image.new("L", (dl, dl), 255)
+image.putpixel((delta, delta), 0)  
+
+
+R0 = 10.
+R1 = 20.
+M = 10
+
+
+for i in range(100001):
+    P = 2 * math.pi*np.random.rand()
+    x = int(math.ceil(math.cos(P)*R0))
+    y = int(math.ceil(math.sin(P)*R0))
+    czy = True
+    
+    while czy:
+        ro = math.sqrt(x**2 + y**2)
+        
+        if ro > R1:
+            break
+        
+        w = random.randint(1,4)
+        
+        if w == 1:
+            x = x + 1
+        if w == 2:
+            x = x - 1
+        if w == 3:
+            y = y + 1 
+        if w == 4: 
+            y = y - 1
+            
+        if ro <= R0 + 1:
+            for z in reversed(range(len(X))):
+                if (x == X[z]) and (y == Y[z]):
+                    czy = False
+                    n[z] = n[z] + 1
+                    if n[z] == M:
+                        image.putpixel((x + delta, y + delta), 0)
+                        X.pop(z)
+                        Y.pop(z)
+                        sprawdz(X, Y, x, y+1)
+                        sprawdz(X, Y, x, y-1)
+                        sprawdz(X, Y, x+1, y)
+                        sprawdz(X, Y, x-1, y)
+                        n = [0]* len(X)
+                        
+                        if ro > R0:
+                            R0 = ro + 5
+                            R1 = 2*R0
+                    break
+
+if i%1000 == 0:
+        nazwa = str(i)
+        image.save("00ifs" + nazwa + ".png", "PNG")
